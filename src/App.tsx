@@ -7,12 +7,15 @@ import { AIPanel } from './components/AIPanel'
 import { Settings } from './components/Settings'
 import { Terms } from './components/Terms'
 import { QuickCheck } from './components/QuickCheck'
-import { Crosshair, Settings as SettingsIcon, Plus, Zap, ClipboardList } from 'lucide-react'
+import { CompetitionList } from './components/CompetitionList'
+import { CompetitionView } from './components/CompetitionView'
+import { PSCImport } from './components/PSCImport'
+import { Crosshair, Settings as SettingsIcon, Plus, Zap, ClipboardList, Trophy, Database } from 'lucide-react'
 
-type Tab = 'quick' | 'planner'
+type Tab = 'quick' | 'planner' | 'compete' | 'data'
 
 export default function App() {
-  const { stages } = useStore()
+  const { stages, competitions, activeCompetitionId } = useStore()
   const [tab, setTab] = useState<Tab>('quick')
   const [showForm, setShowForm] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -20,6 +23,8 @@ export default function App() {
   const [showTerms, setShowTerms] = useState(false)
 
   if (showTerms) return <Terms onClose={() => setShowTerms(false)} />
+
+  const activeCompetition = competitions.find(c => c.id === activeCompetitionId)
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -38,32 +43,11 @@ export default function App() {
           </button>
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 flex gap-1">
-          <button
-            onClick={() => setTab('quick')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              tab === 'quick'
-                ? 'border-red-500 text-zinc-100'
-                : 'border-transparent text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            <Zap className="w-3.5 h-3.5" />
-            Quick Check
-          </button>
-          <button
-            onClick={() => setTab('planner')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              tab === 'planner'
-                ? 'border-red-500 text-zinc-100'
-                : 'border-transparent text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            <ClipboardList className="w-3.5 h-3.5" />
-            Match Planner
-            {stages.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 bg-zinc-800 rounded text-xs text-zinc-400">{stages.length}</span>
-            )}
-          </button>
+        <div className="max-w-4xl mx-auto px-4 flex gap-1 overflow-x-auto">
+          <TabButton active={tab === 'quick'} onClick={() => setTab('quick')} icon={<Zap className="w-3.5 h-3.5" />} label="Quick Check" />
+          <TabButton active={tab === 'planner'} onClick={() => setTab('planner')} icon={<ClipboardList className="w-3.5 h-3.5" />} label="Match Planner" badge={stages.length > 0 ? stages.length : undefined} />
+          <TabButton active={tab === 'compete'} onClick={() => setTab('compete')} icon={<Trophy className="w-3.5 h-3.5" />} label="Competition" badge={competitions.length > 0 ? competitions.length : undefined} />
+          <TabButton active={tab === 'data'} onClick={() => setTab('data')} icon={<Database className="w-3.5 h-3.5" />} label="Data" />
         </div>
       </header>
 
@@ -104,6 +88,22 @@ export default function App() {
             {stages.length > 0 && <AIPanel />}
           </>
         )}
+
+        {tab === 'compete' && (
+          activeCompetition
+            ? <CompetitionView competition={activeCompetition} />
+            : <CompetitionList />
+        )}
+
+        {tab === 'data' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-sm font-medium mb-1">Match Data</h2>
+              <p className="text-xs text-zinc-500">Import PractiScore match files to build benchmark data and import stages into competitions.</p>
+            </div>
+            <PSCImport />
+          </div>
+        )}
       </main>
 
       <footer className="border-t border-zinc-800 px-4 py-4 mt-12">
@@ -114,5 +114,30 @@ export default function App() {
         </div>
       </footer>
     </div>
+  )
+}
+
+function TabButton({ active, onClick, icon, label, badge }: {
+  active: boolean
+  onClick: () => void
+  icon: React.ReactNode
+  label: string
+  badge?: number
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+        active
+          ? 'border-red-500 text-zinc-100'
+          : 'border-transparent text-zinc-500 hover:text-zinc-300'
+      }`}
+    >
+      {icon}
+      {label}
+      {badge !== undefined && (
+        <span className="ml-1 px-1.5 py-0.5 bg-zinc-800 rounded text-xs text-zinc-400">{badge}</span>
+      )}
+    </button>
   )
 }

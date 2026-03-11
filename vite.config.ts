@@ -40,6 +40,11 @@ export default defineConfig({
     }),
   ],
   base: '/hitfactor/',
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/__tests__/setup.ts'],
+  },
   build: {
     rollupOptions: {
       output: {

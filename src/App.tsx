@@ -3,6 +3,7 @@ import { useStore } from './hooks/useStore'
 import { StageForm } from './components/StageForm'
 import { StageCard } from './components/StageCard'
 import { MatchSummary } from './components/MatchSummary'
+import { MatchCharts } from './components/MatchCharts'
 import { AIPanel } from './components/AIPanel'
 import { Settings } from './components/Settings'
 import { Terms } from './components/Terms'
@@ -10,9 +11,12 @@ import { QuickCheck } from './components/QuickCheck'
 import { CompetitionList } from './components/CompetitionList'
 import { CompetitionView } from './components/CompetitionView'
 import { PSCImport } from './components/PSCImport'
-import { Crosshair, Settings as SettingsIcon, Plus, Zap, ClipboardList, Trophy, Database } from 'lucide-react'
+import { DrillLibrary } from './components/DrillLibrary'
+import { MatchHistory } from './components/MatchHistory'
+import { exportMatchCSV, downloadCSV } from './lib/export'
+import { Crosshair, Settings as SettingsIcon, Plus, Zap, ClipboardList, Trophy, Database, BookOpen, History, Download } from 'lucide-react'
 
-type Tab = 'quick' | 'planner' | 'compete' | 'data'
+type Tab = 'quick' | 'planner' | 'compete' | 'data' | 'drills' | 'history'
 
 export default function App() {
   const { stages, competitions, activeCompetitionId } = useStore()
@@ -43,10 +47,12 @@ export default function App() {
           </button>
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 flex gap-1 overflow-x-auto">
+        <div className="max-w-4xl mx-auto px-4 flex gap-0.5 overflow-x-auto scrollbar-hide">
           <TabButton active={tab === 'quick'} onClick={() => setTab('quick')} icon={<Zap className="w-3.5 h-3.5" />} label="Quick Check" />
-          <TabButton active={tab === 'planner'} onClick={() => setTab('planner')} icon={<ClipboardList className="w-3.5 h-3.5" />} label="Match Planner" badge={stages.length > 0 ? stages.length : undefined} />
+          <TabButton active={tab === 'planner'} onClick={() => setTab('planner')} icon={<ClipboardList className="w-3.5 h-3.5" />} label="Planner" badge={stages.length > 0 ? stages.length : undefined} />
           <TabButton active={tab === 'compete'} onClick={() => setTab('compete')} icon={<Trophy className="w-3.5 h-3.5" />} label="Competition" badge={competitions.length > 0 ? competitions.length : undefined} />
+          <TabButton active={tab === 'history'} onClick={() => setTab('history')} icon={<History className="w-3.5 h-3.5" />} label="History" />
+          <TabButton active={tab === 'drills'} onClick={() => setTab('drills')} icon={<BookOpen className="w-3.5 h-3.5" />} label="Drills" />
           <TabButton active={tab === 'data'} onClick={() => setTab('data')} icon={<Database className="w-3.5 h-3.5" />} label="Data" />
         </div>
       </header>
@@ -59,6 +65,7 @@ export default function App() {
         {tab === 'planner' && (
           <>
             {stages.length > 0 && <MatchSummary />}
+            {stages.length > 0 && <MatchCharts stages={stages} />}
 
             {stages.map((stage) => (
               <StageCard
@@ -86,6 +93,16 @@ export default function App() {
             )}
 
             {stages.length > 0 && <AIPanel />}
+
+            {stages.length > 0 && (
+              <button
+                onClick={() => downloadCSV(exportMatchCSV(stages), `match-${new Date().toISOString().split('T')[0]}.csv`)}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-300 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Export to CSV
+              </button>
+            )}
           </>
         )}
 
@@ -94,6 +111,10 @@ export default function App() {
             ? <CompetitionView competition={activeCompetition} />
             : <CompetitionList />
         )}
+
+        {tab === 'history' && <MatchHistory />}
+
+        {tab === 'drills' && <DrillLibrary />}
 
         {tab === 'data' && (
           <div className="space-y-6">
@@ -127,7 +148,7 @@ function TabButton({ active, onClick, icon, label, badge }: {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+      className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
         active
           ? 'border-red-500 text-zinc-100'
           : 'border-transparent text-zinc-500 hover:text-zinc-300'
@@ -136,7 +157,7 @@ function TabButton({ active, onClick, icon, label, badge }: {
       {icon}
       {label}
       {badge !== undefined && (
-        <span className="ml-1 px-1.5 py-0.5 bg-zinc-800 rounded text-xs text-zinc-400">{badge}</span>
+        <span className="ml-1 px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] text-zinc-400">{badge}</span>
       )}
     </button>
   )

@@ -4,8 +4,9 @@ import { CompetitionStageCard } from './CompetitionStageCard'
 import { AddStageForm } from './AddStageForm'
 import { PSCImport } from './PSCImport'
 import { getCompetitionPlan } from '../lib/llm'
+import { exportCompetitionCSV, downloadCSV } from '../lib/export'
 import type { Competition } from '../types/scoring'
-import { ArrowLeft, Plus, Upload, Sparkles, Loader2, Play } from 'lucide-react'
+import { ArrowLeft, Plus, Upload, Sparkles, Loader2, Play, Download } from 'lucide-react'
 
 export function CompetitionView({ competition }: { competition: Competition }) {
   const { setActiveCompetition, updateCompetition, llmConfig, importedMatches } = useStore()
@@ -139,6 +140,17 @@ export function CompetitionView({ competition }: { competition: Competition }) {
             <ImportStageSelector competitionId={competition.id} />
           )}
         </div>
+      )}
+
+      {/* Export */}
+      {completed > 0 && (
+        <button
+          onClick={() => downloadCSV(exportCompetitionCSV(competition), `${competition.name.replace(/\s+/g, '-').toLowerCase()}.csv`)}
+          className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-300 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export Results to CSV
+        </button>
       )}
 
       {/* AI Match Plan */}

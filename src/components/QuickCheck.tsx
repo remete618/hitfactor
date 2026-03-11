@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { calculateStageResult, calculateBreakEven, calculateMaxPoints, createEmptyHits } from '../lib/scoring'
-import type { StageHits, PowerFactor, ScoringMethod, HitZone } from '../types/scoring'
-import { TrendingDown, RotateCcw } from 'lucide-react'
+import type { StageHits, StageInput, PowerFactor, ScoringMethod, HitZone } from '../types/scoring'
+import { TrendingDown, RotateCcw, FlipHorizontal } from 'lucide-react'
 
 const zones: HitZone[] = ['A', 'C', 'D', 'M', 'NS']
 const zoneColors: Record<HitZone, string> = {
@@ -17,20 +17,13 @@ export function QuickCheck() {
   const [powerFactor, setPowerFactor] = useState<PowerFactor>('minor')
   const [scoringMethod, setScoringMethod] = useState<ScoringMethod>('comstock')
   const [procedurals, setProcedurals] = useState(0)
+  const [showWhatIf, setShowWhatIf] = useState(false)
 
   const maxPoints = calculateMaxPoints(roundCount, steelCount)
 
-  const input = {
-    id: 'quick',
-    name: 'Quick Check',
-    hits,
-    time,
-    maxPoints,
-    roundCount,
-    scoringMethod,
-    powerFactor,
-    organization: 'USPSA' as const,
-    procedurals,
+  const input: StageInput = {
+    id: 'quick', name: 'Quick Check', hits, time, maxPoints, roundCount,
+    scoringMethod, powerFactor, organization: 'USPSA', procedurals,
   }
 
   const result = calculateStageResult(input)
@@ -50,6 +43,7 @@ export function QuickCheck() {
     setPowerFactor('minor')
     setScoringMethod('comstock')
     setProcedurals(0)
+    setShowWhatIf(false)
   }
 
   function updateHit(zone: HitZone, value: number) {
@@ -74,11 +68,8 @@ export function QuickCheck() {
         <div className="grid grid-cols-5 gap-3">
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Scoring</label>
-            <select
-              value={scoringMethod}
-              onChange={e => setScoringMethod(e.target.value as ScoringMethod)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500"
-            >
+            <select value={scoringMethod} onChange={e => setScoringMethod(e.target.value as ScoringMethod)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500">
               <option value="comstock">Comstock</option>
               <option value="virginia">Virginia</option>
               <option value="fixed_time">Fixed Time</option>
@@ -86,38 +77,25 @@ export function QuickCheck() {
           </div>
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Power Factor</label>
-            <select
-              value={powerFactor}
-              onChange={e => setPowerFactor(e.target.value as PowerFactor)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500"
-            >
+            <select value={powerFactor} onChange={e => setPowerFactor(e.target.value as PowerFactor)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500">
               <option value="minor">Minor</option>
               <option value="major">Major</option>
             </select>
           </div>
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Rounds</label>
-            <input
-              type="number"
-              value={roundCount}
-              onChange={e => setRoundCount(parseInt(e.target.value) || 0)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500"
-            />
+            <input type="number" value={roundCount} onChange={e => setRoundCount(parseInt(e.target.value) || 0)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500" />
           </div>
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Steel</label>
-            <input
-              type="number"
-              value={steelCount}
-              onChange={e => setSteelCount(parseInt(e.target.value) || 0)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500"
-            />
+            <input type="number" value={steelCount} onChange={e => setSteelCount(parseInt(e.target.value) || 0)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500" />
           </div>
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Max Pts</label>
-            <div className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-400">
-              {maxPoints}
-            </div>
+            <div className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-400">{maxPoints}</div>
           </div>
         </div>
 
@@ -128,13 +106,9 @@ export function QuickCheck() {
             {zones.map(zone => (
               <div key={zone} className="text-center">
                 <span className={`text-xs font-mono font-bold ${zoneColors[zone]}`}>{zone}</span>
-                <input
-                  type="number"
-                  min={0}
-                  value={hits[zone]}
+                <input type="number" min={0} value={hits[zone]}
                   onChange={e => updateHit(zone, parseInt(e.target.value) || 0)}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-center mt-1 focus:outline-none focus:border-zinc-500"
-                />
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-center mt-1 focus:outline-none focus:border-zinc-500" />
               </div>
             ))}
           </div>
@@ -144,23 +118,13 @@ export function QuickCheck() {
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Time (seconds)</label>
-            <input
-              type="number"
-              step="0.01"
-              value={time || ''}
-              onChange={e => setTime(parseFloat(e.target.value) || 0)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500"
-            />
+            <input type="number" step="0.01" value={time || ''} onChange={e => setTime(parseFloat(e.target.value) || 0)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500" />
           </div>
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Procedurals</label>
-            <input
-              type="number"
-              min={0}
-              value={procedurals}
-              onChange={e => setProcedurals(parseInt(e.target.value) || 0)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500"
-            />
+            <input type="number" min={0} value={procedurals} onChange={e => setProcedurals(parseInt(e.target.value) || 0)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-zinc-500" />
           </div>
         </div>
       </div>
@@ -171,15 +135,11 @@ export function QuickCheck() {
           <div className="px-4 py-3 grid grid-cols-4 gap-4">
             <div>
               <div className="text-xs text-zinc-500 mb-0.5">Hit Factor</div>
-              <div className={`text-2xl font-bold font-mono ${hfColor}`}>
-                {result.hitFactor.toFixed(4)}
-              </div>
+              <div className={`text-2xl font-bold font-mono ${hfColor}`}>{result.hitFactor.toFixed(4)}</div>
             </div>
             <div>
               <div className="text-xs text-zinc-500 mb-0.5">Points</div>
-              <div className="text-2xl font-bold font-mono">
-                {result.totalPoints}<span className="text-zinc-600 text-sm">/{result.maxPoints}</span>
-              </div>
+              <div className="text-2xl font-bold font-mono">{result.totalPoints}<span className="text-zinc-600 text-sm">/{result.maxPoints}</span></div>
             </div>
             <div>
               <div className="text-xs text-zinc-500 mb-0.5">Time</div>
@@ -206,9 +166,7 @@ export function QuickCheck() {
                 <div>
                   <span className="text-zinc-400">A&rarr;C break-even:</span>
                   <span className="text-zinc-200 font-mono ml-1">{breakEven.breakEvenTimePerAToC}s</span>
-                  <div className="text-zinc-600 mt-0.5">
-                    Save &gt;{breakEven.breakEvenTimePerAToC}s per hit to justify
-                  </div>
+                  <div className="text-zinc-600 mt-0.5">Save &gt;{breakEven.breakEvenTimePerAToC}s per hit to justify</div>
                 </div>
               </div>
               <div className="flex items-start gap-2">
@@ -216,18 +174,27 @@ export function QuickCheck() {
                 <div>
                   <span className="text-zinc-400">A&rarr;D break-even:</span>
                   <span className="text-zinc-200 font-mono ml-1">{breakEven.breakEvenTimePerAToD}s</span>
-                  <div className="text-zinc-600 mt-0.5">
-                    Save &gt;{breakEven.breakEvenTimePerAToD}s per hit to justify
-                  </div>
+                  <div className="text-zinc-600 mt-0.5">Save &gt;{breakEven.breakEvenTimePerAToD}s per hit to justify</div>
                 </div>
               </div>
             </div>
-            <div className="mt-2 text-xs text-zinc-400 leading-relaxed">
-              {breakEven.recommendation}
-            </div>
+            <div className="mt-2 text-xs text-zinc-400 leading-relaxed">{breakEven.recommendation}</div>
+          </div>
+
+          {/* What-If toggle */}
+          <div className="px-4 py-2 border-t border-zinc-800">
+            <button
+              onClick={() => setShowWhatIf(!showWhatIf)}
+              className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <FlipHorizontal className="w-3 h-3" />
+              {showWhatIf ? 'Hide What-If Simulator' : 'What-If Simulator'}
+            </button>
           </div>
         </div>
       )}
+
+      {hasData && showWhatIf && <WhatIfSimulator baseInput={input} baseResult={result} />}
 
       {!hasData && (
         <div className="text-center py-8 text-zinc-600 text-sm">
@@ -235,5 +202,126 @@ export function QuickCheck() {
         </div>
       )}
     </div>
+  )
+}
+
+function WhatIfSimulator({ baseInput, baseResult }: { baseInput: StageInput; baseResult: ReturnType<typeof calculateStageResult> }) {
+  const [wiHits, setWiHits] = useState<StageHits>({ ...baseInput.hits })
+  const [wiTime, setWiTime] = useState(baseInput.time)
+  const [wiProcedurals, setWiProcedurals] = useState(baseInput.procedurals)
+
+  const wiInput: StageInput = { ...baseInput, hits: wiHits, time: wiTime, procedurals: wiProcedurals }
+  const wiResult = calculateStageResult(wiInput)
+
+  const hfDiff = wiResult.hitFactor - baseResult.hitFactor
+  const ptsDiff = wiResult.totalPoints - baseResult.totalPoints
+  const timeDiff = wiTime - baseInput.time
+
+  const diffColor = (val: number, invert = false) => {
+    const positive = invert ? val < 0 : val > 0
+    return val === 0 ? 'text-zinc-500' : positive ? 'text-green-400' : 'text-red-400'
+  }
+
+  function formatDiff(val: number, decimals: number, invert = false) {
+    const prefix = val > 0 ? '+' : ''
+    return <span className={`font-mono ${diffColor(val, invert)}`}>{prefix}{val.toFixed(decimals)}</span>
+  }
+
+  return (
+    <div className="bg-zinc-900 border border-blue-900/50 rounded-lg overflow-hidden">
+      <div className="px-4 py-3 border-b border-zinc-800 bg-blue-950/20">
+        <h3 className="text-sm font-medium text-blue-400">What-If Simulator</h3>
+        <p className="text-xs text-zinc-500 mt-0.5">Adjust hits and time to compare against your actual result</p>
+      </div>
+
+      <div className="px-4 py-3">
+        <div className="grid grid-cols-5 gap-2">
+          {zones.map(zone => (
+            <div key={zone} className="text-center">
+              <span className={`text-xs font-mono font-bold ${zoneColors[zone]}`}>{zone}</span>
+              <input type="number" min={0} value={wiHits[zone]}
+                onChange={e => setWiHits(prev => ({ ...prev, [zone]: Math.max(0, parseInt(e.target.value) || 0) }))}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm text-center mt-1 focus:outline-none focus:border-blue-500" />
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-zinc-500 block mb-1">Time (s)</label>
+            <input type="number" step="0.01" value={wiTime || ''} onChange={e => setWiTime(parseFloat(e.target.value) || 0)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500" />
+          </div>
+          <div>
+            <label className="text-xs text-zinc-500 block mb-1">Procedurals</label>
+            <input type="number" min={0} value={wiProcedurals} onChange={e => setWiProcedurals(parseInt(e.target.value) || 0)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500" />
+          </div>
+        </div>
+      </div>
+
+      {/* Comparison */}
+      <div className="px-4 py-3 border-t border-zinc-800">
+        <div className="grid grid-cols-4 gap-4 text-center">
+          <div>
+            <div className="text-xs text-zinc-500 mb-1">Hit Factor</div>
+            <div className="text-lg font-bold font-mono">{wiResult.hitFactor.toFixed(4)}</div>
+            <div className="text-xs">{formatDiff(hfDiff, 4)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-zinc-500 mb-1">Points</div>
+            <div className="text-lg font-bold font-mono">{wiResult.totalPoints}</div>
+            <div className="text-xs">{formatDiff(ptsDiff, 0)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-zinc-500 mb-1">Time</div>
+            <div className="text-lg font-bold font-mono">{wiTime.toFixed(2)}s</div>
+            <div className="text-xs">{formatDiff(timeDiff, 2, true)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-zinc-500 mb-1">Accuracy</div>
+            <div className="text-lg font-bold font-mono">{wiResult.percentOfMax}%</div>
+            <div className="text-xs">{formatDiff(wiResult.percentOfMax - baseResult.percentOfMax, 1)}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick scenarios */}
+      <div className="px-4 py-3 border-t border-zinc-800">
+        <div className="text-xs text-zinc-500 mb-2">Quick scenarios</div>
+        <div className="flex flex-wrap gap-2">
+          <ScenarioButton label="All As" onClick={() => {
+            const total = baseInput.hits.A + baseInput.hits.C + baseInput.hits.D
+            setWiHits({ A: total, C: 0, D: 0, M: 0, NS: 0 })
+          }} />
+          <ScenarioButton label="-1s faster" onClick={() => setWiTime(Math.max(0.01, wiTime - 1))} />
+          <ScenarioButton label="+1s slower" onClick={() => setWiTime(wiTime + 1)} />
+          <ScenarioButton label="2 As → Cs" onClick={() => {
+            if (wiHits.A >= 2) setWiHits({ ...wiHits, A: wiHits.A - 2, C: wiHits.C + 2 })
+          }} />
+          <ScenarioButton label="1 A → M" onClick={() => {
+            if (wiHits.A >= 1) setWiHits({ ...wiHits, A: wiHits.A - 1, M: wiHits.M + 1 })
+          }} />
+          <ScenarioButton label="No misses" onClick={() => {
+            setWiHits({ ...wiHits, A: wiHits.A + wiHits.M, M: 0 })
+          }} />
+          <ScenarioButton label="Reset" onClick={() => {
+            setWiHits({ ...baseInput.hits })
+            setWiTime(baseInput.time)
+            setWiProcedurals(baseInput.procedurals)
+          }} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ScenarioButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+    >
+      {label}
+    </button>
   )
 }

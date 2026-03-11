@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useStore } from '../hooks/useStore'
 import { getStageAdvice } from '../lib/llm'
 import { calculateStageResult, calculateBreakEven, createEmptyHits } from '../lib/scoring'
-import type { CompetitionStage, StageInput, ShooterClass, HitZone, ReferenceScore } from '../types/scoring'
+import { VoiceInput } from './VoiceInput'
+import type { CompetitionStage, StageInput, ShooterClass, HitZone, ReferenceScore, StageHits } from '../types/scoring'
 import { Sparkles, Loader2, Trash2, ChevronDown, ChevronUp, Target, Clock, TrendingDown, Plus, UserPlus, Check } from 'lucide-react'
 
 const zones: HitZone[] = ['A', 'C', 'D', 'M', 'NS']
@@ -270,7 +271,15 @@ function ResultEntry({ stage, competitionId, onClose }: { stage: CompetitionStag
 
   return (
     <div className="px-4 py-3 border-t border-zinc-800 bg-zinc-800/30 space-y-3">
-      <div className="text-xs font-medium text-zinc-400">Enter your result</div>
+      <div className="flex items-center justify-between">
+        <div className="text-xs font-medium text-zinc-400">Enter your result</div>
+        <VoiceInput onResult={(vHits, vTime) => {
+          if (vHits.A !== undefined || vHits.C !== undefined || vHits.D !== undefined || vHits.M !== undefined || vHits.NS !== undefined) {
+            setHits(prev => ({ ...prev, ...Object.fromEntries(Object.entries(vHits).filter(([, v]) => v !== undefined)) } as StageHits))
+          }
+          if (vTime !== undefined) setTime(vTime)
+        }} />
+      </div>
       <div className="grid grid-cols-5 gap-2">
         {zones.map(zone => (
           <div key={zone} className="text-center">

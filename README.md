@@ -1,48 +1,69 @@
 # Hit Factor
 
-**IPSC/USPSA Hit Factor Calculator & Stage Analyzer**
+**IPSC/USPSA Hit Factor Calculator, Stage Analyzer & Competition Planner**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Deploy](https://img.shields.io/github/actions/workflow/status/remete618/hitfactor/deploy.yml?label=deploy)](https://github.com/remete618/hitfactor/actions)
 [![GitHub Pages](https://img.shields.io/badge/live-GitHub%20Pages-blue)](https://remete618.github.io/hitfactor/)
+[![PWA](https://img.shields.io/badge/PWA-installable-brightgreen)](https://remete618.github.io/hitfactor/)
 
-> Calculate hit factors, analyze speed vs. accuracy trade-offs, and get AI-powered match insights for IPSC and USPSA competition shooting.
+> Calculate hit factors, plan competitions stage by stage, get AI coaching, and track your performance over time. Installable as a phone app for use at the range.
 
-**Live demo:** [remete618.github.io/hitfactor](https://remete618.github.io/hitfactor/)
+**Live app:** [remete618.github.io/hitfactor](https://remete618.github.io/hitfactor/)
+
+---
+
+## Features
+
+### Quick Check
+Single stage instant calculator. Enter hits and time, get HF + break-even analysis. What-If simulator lets you adjust hits/time to compare scenarios with quick buttons: "All As", "-1s faster", "2 As → Cs", etc.
+
+### Match Planner
+Multi-stage tracking with match summary, charts (HF by stage, hit zone distribution, points earned vs lost, speed/accuracy radar), AI analysis, and CSV export.
+
+### Competition Mode
+Full match planner with AI coaching:
+- Create competitions with your division and classification
+- Add stages manually, upload stage card photos, or import from PractiScore
+- Set starting stage — system reorders to your shooting sequence
+- Get per-stage AI tactical advice (considers benchmarks + reference scores)
+- Generate full match strategy plan
+- Enter results stage by stage — progress bar tracks completion
+- Add other shooters' results as reference data for AI comparison
+- Export results to CSV
+
+### PractiScore Import
+Import `.psc` files (exported from PractiScore app) or `.json` match data. Parses stages, shooters, scores, and classifications. Feeds the benchmark engine.
+
+### Benchmark Engine
+Aggregates hit factor and accuracy data by shooter classification (GM/M/A/B/C/D) from imported matches. Auto-finds similar stages for benchmarking.
+
+### Match History
+Track performance across competitions. HF trend line shows improvement over time.
+
+### Drill Library
+7 standard practice drills with descriptions, target HFs by classification, and tactical tips:
+- El Presidente, Bill Drill, Blake Drill, Mozambique, Smoke & Hope, Accelerator, Dot Torture
+
+### Voice Input
+Dictate hits and time hands-free at the range. "12 alphas, 4 charlies, 0 mikes, 8.43 seconds"
+
+### PWA
+Installable as a home screen app on iPhone/Android. Works offline for all scoring calculations.
 
 ---
 
-## What It Does
+## Break-Even Analysis
 
-Hit Factor answers the core question every competitive shooter faces: **should I push speed or focus on accuracy?**
+The core insight: at what point does dropping accuracy for speed actually pay off?
 
-In IPSC/USPSA, Hit Factor = Points / Time. Shooting faster lowers your time but may drop shots from A-zone to C or D. This tool calculates the exact break-even point — how much time you need to save per shot to justify accepting lower-scoring hits.
+| Zone Drop | Minor PF Cost | Major PF Cost |
+|-----------|---------------|---------------|
+| A → C     | -2 pts/hit    | -1 pt/hit     |
+| A → D     | -4 pts/hit    | -3 pts/hit    |
+| A → M     | -15 pts/hit   | -15 pts/hit   |
 
-### Two Modes
-
-- **Quick Check** — Enter hits and time for a single stage. Get instant hit factor, accuracy percentage, and break-even analysis. No account, no saving — just fast math.
-- **Match Planner** — Build a full match with multiple stages. Track totals across the event, identify your weakest stage, find where you're leaving the most points on the table, and run AI analysis on the complete match.
-
-### Break-Even Analysis
-
-For each stage, the calculator computes:
-
-- **A→C break-even time** — How many seconds per hit you'd need to save by shooting faster to justify dropping from A-zone to C-zone
-- **A→D break-even time** — Same calculation for A-zone to D-zone drops
-- **Recommendation** — Based on your current hit factor, whether to push speed, accept some C-hits, or slow down and aim
-
-Example: at a 5.0 HF with Minor power factor, each A→C drop costs you 0.4s equivalent. If you can't save more than 0.4s per hit by shooting faster, stay on the A-zone.
-
-### AI Features (Optional)
-
-Connect your own API key (Claude, OpenAI, or Gemini) to enable:
-
-- **Match analysis** — AI reviews all your stages and provides coaching insights on where to improve
-- **Stage card extraction** — Upload a photo of a printed stage design card and automatically extract round count, scoring method, and stage name
-
-API keys stay in browser memory only. Requests go directly from your browser to the AI provider. Nothing passes through our servers.
-
----
+Example: at 5.0 HF with Minor PF, each A→C drop costs 0.4s equivalent. If you can't save 0.4s by shooting faster, stay on the A-zone.
 
 ## Scoring Reference
 
@@ -54,13 +75,7 @@ API keys stay in browser memory only. Requests go directly from your browser to 
 | M    | -10 pen  | -10 pen  |
 | NS   | -10 pen  | -10 pen  |
 
-**Hit Factor** = Total Points / Time (Comstock scoring)
-
-**Power Factor**: Minor (125+ PF) vs Major (165+ PF) — affects C and D zone point values.
-
-**Scoring methods**: Comstock (points/time), Virginia Count (fixed round count), Fixed Time.
-
-Supports both **USPSA** and **IPSC** rule sets.
+**Hit Factor** = Points / Time &nbsp;|&nbsp; **Power Factor**: Minor (125+) vs Major (165+)
 
 ---
 
@@ -70,14 +85,16 @@ Supports both **USPSA** and **IPSC** rule sets.
 |-------------|-----------------------------|
 | Framework   | React 19                    |
 | Language    | TypeScript 5.9              |
-| Build       | Vite 7                      |
+| Build       | Vite 7 + PWA plugin         |
 | Styling     | Tailwind CSS v4             |
 | State       | Zustand (localStorage sync) |
+| Charts      | Recharts                    |
 | Icons       | Lucide React                |
+| ZIP Parsing | JSZip                       |
 | AI APIs     | Claude, OpenAI, Gemini      |
 | Hosting     | GitHub Pages                |
 
-All scoring calculations run client-side. No backend. No database. Stage data persists in `localStorage`.
+All scoring runs client-side. No backend. No database. Data persists in `localStorage`.
 
 ---
 
@@ -85,32 +102,38 @@ All scoring calculations run client-side. No backend. No database. Stage data pe
 
 ```
 src/
-├── types/scoring.ts       # TypeScript types for all scoring concepts
+├── types/scoring.ts              # All TypeScript types
 ├── lib/
-│   ├── scoring.ts         # Core scoring engine + break-even analysis
-│   ├── llm.ts             # LLM API integration (3 providers)
-│   └── vision.ts          # Stage card image extraction via AI vision
-├── hooks/useStore.ts      # Zustand store with localStorage persistence
+│   ├── scoring.ts                # Scoring engine + break-even analysis
+│   ├── llm.ts                    # LLM integration (3 providers, stage advice, match plans)
+│   ├── vision.ts                 # Stage card image extraction
+│   ├── psc-parser.ts             # PractiScore .psc file parser
+│   ├── benchmarks.ts             # HF benchmark aggregation
+│   ├── voice.ts                  # Speech recognition parser
+│   └── export.ts                 # CSV export
+├── hooks/useStore.ts             # Zustand store
 └── components/
-    ├── QuickCheck.tsx      # Single-stage instant calculator
-    ├── StageForm.tsx       # Stage input form + image upload
-    ├── StageCard.tsx       # Stage result display + break-even
-    ├── MatchSummary.tsx    # Multi-stage match overview
-    ├── AIPanel.tsx         # AI match analysis trigger + display
-    ├── Settings.tsx        # LLM provider/key/model config
-    └── Terms.tsx           # Terms & conditions page
+    ├── QuickCheck.tsx             # Single stage calculator + what-if
+    ├── StageForm.tsx              # Stage input form + image upload
+    ├── StageCard.tsx              # Stage result display
+    ├── MatchSummary.tsx           # Multi-stage overview
+    ├── MatchCharts.tsx            # Visual analytics (4 chart types)
+    ├── AIPanel.tsx                # AI analysis trigger
+    ├── CompetitionList.tsx        # Competition manager
+    ├── CompetitionView.tsx        # Competition stage-by-stage view
+    ├── CompetitionStageCard.tsx   # Stage card with AI advice + results
+    ├── AddStageForm.tsx           # Add stage to competition
+    ├── PSCImport.tsx              # PractiScore file import
+    ├── DrillLibrary.tsx           # Practice drill reference
+    ├── MatchHistory.tsx           # Performance tracking + trends
+    ├── VoiceInput.tsx             # Voice dictation component
+    ├── Settings.tsx               # LLM config
+    └── Terms.tsx                  # Terms & conditions
 ```
 
 ---
 
 ## Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- npm
-
-### Install & Run
 
 ```bash
 git clone https://github.com/remete618/hitfactor.git
@@ -119,31 +142,28 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173/hitfactor/` in your browser.
+Open `http://localhost:5173/hitfactor/`
 
-### Build for Production
+### Build
 
 ```bash
 npm run build
 ```
 
-Output goes to `dist/`.
-
 ### Deploy
 
-Pushes to `main` auto-deploy to GitHub Pages via the included workflow (`.github/workflows/deploy.yml`).
+Pushes to `main` auto-deploy to GitHub Pages.
 
 ---
 
 ## Contributing
 
-Contributions welcome. Open an issue or submit a pull request.
+Contributions welcome. Open an issue or PR.
 
 1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/my-feature`)
+2. Create a feature branch
 3. Commit your changes
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a Pull Request
+4. Open a Pull Request
 
 ---
 
@@ -151,14 +171,10 @@ Contributions welcome. Open an issue or submit a pull request.
 
 [MIT](LICENSE) — Radu Cioplea
 
----
-
 ## Author
 
-**Radu Cioplea**
-- Email: [radu@cioplea.com](mailto:radu@cioplea.com)
-- Web: [eyepaq.com](https://www.eyepaq.com)
+**Radu Cioplea** — [radu@cioplea.com](mailto:radu@cioplea.com) — [eyepaq.com](https://www.eyepaq.com)
 
 ---
 
-`#ipsc` `#uspsa` `#hit-factor` `#competitive-shooting` `#speed-vs-accuracy` `#break-even-analysis` `#react` `#typescript` `#open-source`
+`#ipsc` `#uspsa` `#hit-factor` `#competitive-shooting` `#speed-vs-accuracy` `#break-even-analysis` `#pwa` `#react` `#typescript` `#practiscore` `#open-source`

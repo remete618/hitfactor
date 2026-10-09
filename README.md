@@ -112,6 +112,7 @@ src/
 │   ├── voice.ts                  # Speech recognition parser
 │   └── export.ts                 # CSV export
 ├── hooks/useStore.ts             # Zustand store
+├── __tests__/                    # Vitest suite (scoring, parser, store, export, voice, benchmarks)
 └── components/
     ├── QuickCheck.tsx             # Single stage calculator + what-if
     ├── StageForm.tsx              # Stage input form + image upload
@@ -143,6 +144,14 @@ npm run dev
 ```
 
 Open `http://localhost:5173/hitfactor/`
+
+### Test
+
+```bash
+npm test
+```
+
+The same suite runs in CI on every push and pull request before the build and deploy steps.
 
 ### Build
 
